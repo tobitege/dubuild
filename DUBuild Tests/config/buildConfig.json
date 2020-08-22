@@ -1,0 +1,11 @@
+﻿{
+	"Minify": false,
+	"Slots": [
+		{
+			"Files": [ "test.lua" ],
+			"Slot": "-1",
+			"Signature": "start()",
+			"Args": ""
+		}
+	]
+}
