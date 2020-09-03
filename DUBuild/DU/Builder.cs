@@ -28,6 +28,7 @@ namespace DUBuild.DU
 
             var outputModule = new DU.OutputModule();
 
+            var counter = 0;
             foreach (var slot in configuration.Slots)
             {
                 var sb = new StringBuilder();
@@ -46,6 +47,7 @@ namespace DUBuild.DU
                             var sourceFileContents = sourceFileReader.ReadToEnd();
                             if (configuration.Minify) sourceFileContents = Minify(sourceFileContents);
                             sb.Append(sourceFileContents);
+                            sb.Append("\n");
                         }
                     }
                 }
@@ -53,13 +55,16 @@ namespace DUBuild.DU
                 outputModule.Handlers.Add(new OutputHandler()
                 {
                     Code = sb.ToString(),
-                    Filter = new OutputHandlerFilter() { 
-                        Args = (slot.Args.Length>0)?new List<Dictionary<string, string>>() { new Dictionary<string, string>() { { "variable", slot.Args } } } : new List<Dictionary<string, string>>(), 
-                            Signature = slot.Signature, 
-                            SlotKey = slot.Slot
-                        },
-                    Key = slot.Slot
+                    Filter = new OutputHandlerFilter()
+                    {
+                        Args = (slot.Args.Length > 0) ? new List<Dictionary<string, string>>() { new Dictionary<string, string>() { { "variable", slot.Args } } } : new List<Dictionary<string, string>>(),
+                        Signature = slot.Signature,
+                        SlotKey = slot.Slot
+                    },
+                    Key = counter.ToString()
                 });
+
+                counter++;
             }
 
             var outputFile = System.IO.Path.Combine(outputDir.FullName, outputFileName);

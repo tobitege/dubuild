@@ -20,36 +20,45 @@ namespace DUBuild
             app.Description = "Dual Universe script compiler";
             app.HelpOption("-?|-h|--help");
 
-            var sourceDir = app.Option("-s|--source", "Source files location", CommandOptionType.SingleValue);
-            var outputDir = app.Option("-o|--output", "Output location", CommandOptionType.SingleValue);
-            var configFile = app.Option("-c|--config", "Output location", CommandOptionType.SingleValue);
-            var shipID = app.Option("-i|--id", "Ship ID to encrypt for", CommandOptionType.SingleValue);
+            app.Command("build", (command) =>{
+                command.Description = "Build a DU script";
 
-            app.OnExecute(() =>
-            {
-                if (!sourceDir.HasValue()) {
-                    logger.Error("Missing source directory");
-                    app.ShowHint();
-                }
-                if (!outputDir.HasValue())
+                var sourceDir = command.Option("-s|--source", "Source files location", CommandOptionType.SingleValue);
+                var outputDir = command.Option("-o|--output", "Output location", CommandOptionType.SingleValue);
+                var configFile = command.Option("-c|--config", "Output location", CommandOptionType.SingleValue);
+
+                command.OnExecute(() =>
                 {
-                    logger.Error("Missing output directory");
-                    app.ShowHint();
-                }
-                if (!configFile.HasValue())
-                {
-                    logger.Error("Missing config file");
-                    app.ShowHint();
-                }
+                    if (!sourceDir.HasValue())
+                    {
+                        logger.Error("Missing source directory");
+                        app.ShowHint();
+                        Environment.Exit(2);
+                    }
+                    if (!outputDir.HasValue())
+                    {
+                        logger.Error("Missing output directory");
+                        app.ShowHint();
+                        Environment.Exit(2);
+                    }
+                    if (!configFile.HasValue())
+                    {
+                        logger.Error("Missing config file");
+                        app.ShowHint();
+                        Environment.Exit(2);
+                    }
 
-                var builder = new DU.Builder(
-                    new System.IO.DirectoryInfo(sourceDir.Value()),
-                    new System.IO.DirectoryInfo(outputDir.Value()),
-                    new System.IO.FileInfo(configFile.Value())
-                    );
+                    var builder = new DU.Builder(
+                        new System.IO.DirectoryInfo(sourceDir.Value()),
+                        new System.IO.DirectoryInfo(outputDir.Value()),
+                        new System.IO.FileInfo(configFile.Value())
+                        );
 
-                return 0;
+                    return 0;
+                });
+
             });
+            app.Execute(args);
 
         }
     }
