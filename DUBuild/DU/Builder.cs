@@ -26,6 +26,8 @@ namespace DUBuild.DU
 
             var configuration = Newtonsoft.Json.JsonConvert.DeserializeObject<DU.Configuration>(configFile.OpenText().ReadToEnd());
 
+            var environmentVariables = Environment.GetEnvironmentVariables();
+
             var outputModule = new DU.OutputModule();
 
             var counter = 0;
@@ -34,7 +36,14 @@ namespace DUBuild.DU
                 var sb = new StringBuilder();
                 if (slot.Code != null && slot.Code != String.Empty)
                 {
-                    sb.Append(slot.Code);
+                    var code = slot.Code;
+                    foreach (var env in environmentVariables.Keys)
+                    {
+                        var value = environmentVariables[env];
+                        code = code.Replace(env as string, value as string, StringComparison.InvariantCulture);
+                    }
+
+                    sb.Append(code);
                 }
                 else
                 {
@@ -45,6 +54,13 @@ namespace DUBuild.DU
                         using (var sourceFileReader = new System.IO.StreamReader(sourcePath))
                         {
                             var sourceFileContents = sourceFileReader.ReadToEnd();
+
+                            foreach (var env in environmentVariables.Keys)
+                            {
+                                var value = environmentVariables[env];
+                                sourceFileContents = sourceFileContents.Replace(env as string, value as string, StringComparison.InvariantCulture);
+                            }
+
                             if (configuration.Minify) sourceFileContents = Minify(sourceFileContents);
                             sb.Append(sourceFileContents);
                             sb.Append("\n");
