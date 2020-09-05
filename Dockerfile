@@ -9,5 +9,5 @@ RUN dotnet build "DUBuild.csproj" -c Release -o /app/build
 RUN dotnet publish "DUBuild.csproj" -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/core/runtime:3.1-alpine
-WORKDIR "/app"
+WORKDIR /app
 COPY --from=0 /app/publish .
