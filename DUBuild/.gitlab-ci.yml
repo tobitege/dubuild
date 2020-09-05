@@ -1,0 +1,16 @@
+﻿stages:
+  - build
+
+workflow:
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "production"'
+
+build:
+  image: docker:latest
+  stage: build
+  variables:
+   GIT_SUBMODULE_STRATEGY: recursive
+  script:
+   - docker build --pull -t "registry.internal.st/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME" .
+   - docker push "registry.internal.st/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME"
