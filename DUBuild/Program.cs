@@ -14,7 +14,6 @@ namespace DUBuild
             var versionHash = System.IO.File.ReadAllText(System.IO.Path.Combine(rootDir, "versionhash"));
 
             logger.Info($"Version {versionHash}");
-            logger.Info($"Running with arguments {String.Join(',', args)}");
 
             var app = new CommandLineApplication();
             app.Name = "DUBuild";
@@ -27,6 +26,7 @@ namespace DUBuild
                 var sourceDir = command.Option("-s|--source", "Source files location", CommandOptionType.SingleValue);
                 var outputDir = command.Option("-o|--output", "Output location", CommandOptionType.SingleValue);
                 var configFile = command.Option("-c|--config", "Output location", CommandOptionType.SingleValue);
+                var outFileName = command.Option("-f|--filename", "Output file name", CommandOptionType.SingleValue);
 
                 command.OnExecute(() =>
                 {
@@ -52,7 +52,8 @@ namespace DUBuild
                     var builder = new DU.Builder(
                         new System.IO.DirectoryInfo(sourceDir.Value()),
                         new System.IO.DirectoryInfo(outputDir.Value()),
-                        new System.IO.FileInfo(configFile.Value())
+                        new System.IO.FileInfo(configFile.Value()),
+                        outFileName.HasValue()?outFileName.Value():"out.json"
                         );
 
                     return 0;

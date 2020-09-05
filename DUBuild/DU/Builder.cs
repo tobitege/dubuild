@@ -11,6 +11,12 @@ namespace DUBuild.DU
         public Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, System.IO.FileInfo configFile, String outputFileName="out.json")
         {
             var Logger = NLog.LogManager.GetCurrentClassLogger();
+
+            Logger.Info("Source path : {0}", sourceDir.FullName);
+            Logger.Info("Destination path : {0}", outputDir.FullName);
+            Logger.Info("Config path : {0}", configFile.FullName);
+            Logger.Info("Output filename : {0}", outputFileName);
+
             if (!sourceDir.Exists)
             {
                 throw new Exception("Source directory does not exist");
