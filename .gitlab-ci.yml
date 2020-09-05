@@ -12,4 +12,4 @@ build:
     GIT_SUBMODULE_STRATEGY: recursive
   script:
     - docker build --pull -t "registry.internal.st/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME" .
-    - docker push "registry.internal.st"/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME"
+    - docker push "registry.internal.st/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME"
