@@ -14,6 +14,7 @@ namespace DUBuild
             var versionHash = System.IO.File.ReadAllText(System.IO.Path.Combine(rootDir, "versionhash"));
 
             logger.Info($"Version {versionHash}");
+            logger.Info($"Running with arguments {String.Join(',', args)}");
 
             var app = new CommandLineApplication();
             app.Name = "DUBuild";

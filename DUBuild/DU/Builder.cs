@@ -17,7 +17,7 @@ namespace DUBuild.DU
             }
             if (!outputDir.Exists)
             {
-                throw new Exception("Output directory does not exist");
+                outputDir.Create();
             }
             if (!configFile.Exists)
             {
