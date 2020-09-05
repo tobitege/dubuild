@@ -31,6 +31,7 @@ namespace DUBuild.DU
             }
 
             var configuration = Newtonsoft.Json.JsonConvert.DeserializeObject<DU.Configuration>(configFile.OpenText().ReadToEnd());
+            Logger.Info("Loaded build config successfully");
 
             var environmentVariables = Environment.GetEnvironmentVariables();
 
@@ -90,7 +91,9 @@ namespace DUBuild.DU
             }
 
             var outputFile = System.IO.Path.Combine(outputDir.FullName, outputFileName);
-            System.IO.File.WriteAllText(outputFile, Newtonsoft.Json.JsonConvert.SerializeObject(outputModule, Newtonsoft.Json.Formatting.Indented));
+            var outputJsonData = Newtonsoft.Json.JsonConvert.SerializeObject(outputModule, Newtonsoft.Json.Formatting.Indented);
+            Logger.Info("Writing output ({1} characters) to {0}", outputFile, outputJsonData.Length);
+            System.IO.File.WriteAllText(outputFile, outputJsonData);
         }
 
         public string Minify(string source)
