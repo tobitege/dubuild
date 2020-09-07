@@ -8,6 +8,31 @@ namespace DUBuild.DU
     public class Builder
     {
 
+        private OutputHandler GenerateSlot(string code, string args, string signature, string slot, int counter)
+        {
+            return new OutputHandler()
+            {
+                Code = code,
+                Filter = new OutputHandlerFilter()
+                {
+                    Args = (args.Length > 0) ? new List<Dictionary<string, string>>() { new Dictionary<string, string>() { { "variable", args } } } : new List<Dictionary<string, string>>(),
+                    Signature = signature,
+                    SlotKey = slot
+                },
+                Key = counter.ToString()
+            };
+        }
+        private string ReplaceEnv(string code, System.Collections.IDictionary envKeys)
+        {
+            foreach (var env in envKeys.Keys)
+            {
+                var value = envKeys[env];
+                code = code.Replace(env as string, value as string, StringComparison.InvariantCulture);
+            }
+
+            return code;
+        }
+
         public Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, System.IO.FileInfo configFile, String outputFileName="out.json")
         {
             var Logger = NLog.LogManager.GetCurrentClassLogger();
@@ -34,6 +59,11 @@ namespace DUBuild.DU
             Logger.Info("Loaded build config successfully");
 
             var environmentVariables = Environment.GetEnvironmentVariables();
+            Logger.Info("Environment Variables");
+            foreach (var key in environmentVariables.Keys)
+            {
+                Logger.Info("{0} -> {1}", key as string, environmentVariables[key] as string);
+            }
 
             var outputModule = new DU.OutputModule();
 
@@ -51,6 +81,29 @@ namespace DUBuild.DU
                     }
 
                     sb.Append(code);
+                    outputModule.Handlers.Add(GenerateSlot(sb.ToString(), slot.Args, slot.Signature, slot.Slot, counter));
+                }
+                else if (slot.Directory != null & slot.Directory != String.Empty)
+                {
+                    var fileInfo = new System.IO.FileInfo(slot.Directory);
+                    var filePattern = fileInfo.Name;
+                    var directoryInfo = fileInfo.Directory;
+                    foreach (var file in directoryInfo.EnumerateFiles(filePattern))
+                    {
+                        sb.Clear();
+                        using (var sourceFileReader = new System.IO.StreamReader(file.FullName))
+                        {
+                            var sourceFileContents = sourceFileReader.ReadToEnd();
+
+                            sourceFileContents = ReplaceEnv(sourceFileContents, environmentVariables);
+
+                            if (configuration.Minify) sourceFileContents = Minify(sourceFileContents);
+                            sb.Append(sourceFileContents);
+
+                            outputModule.Handlers.Add(GenerateSlot(sb.ToString(), slot.Args, slot.Signature, slot.Slot, counter));
+                            counter++;
+                        }
+                    }
                 }
                 else
                 {
@@ -62,31 +115,15 @@ namespace DUBuild.DU
                         {
                             var sourceFileContents = sourceFileReader.ReadToEnd();
 
-                            foreach (var env in environmentVariables.Keys)
-                            {
-                                var value = environmentVariables[env];
-                                sourceFileContents = sourceFileContents.Replace(env as string, value as string, StringComparison.InvariantCulture);
-                            }
+                            sourceFileContents = ReplaceEnv(sourceFileContents, environmentVariables);
 
                             if (configuration.Minify) sourceFileContents = Minify(sourceFileContents);
                             sb.Append(sourceFileContents);
                             sb.Append("\n");
                         }
                     }
+                    outputModule.Handlers.Add(GenerateSlot(sb.ToString(), slot.Args, slot.Signature, slot.Slot, counter));
                 }
-
-                outputModule.Handlers.Add(new OutputHandler()
-                {
-                    Code = sb.ToString(),
-                    Filter = new OutputHandlerFilter()
-                    {
-                        Args = (slot.Args.Length > 0) ? new List<Dictionary<string, string>>() { new Dictionary<string, string>() { { "variable", slot.Args } } } : new List<Dictionary<string, string>>(),
-                        Signature = slot.Signature,
-                        SlotKey = slot.Slot
-                    },
-                    Key = counter.ToString()
-                });
-
                 counter++;
             }
 

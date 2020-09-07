@@ -8,6 +8,7 @@ namespace DUBuild.DU
     {
         public IEnumerable<string> Files { get; set; }
         public string Code { get; set; }
+        public string Directory { get; set; }
         public string Slot { get; set; }
         public string Signature { get; set; }
         public string Args { get; set; }
