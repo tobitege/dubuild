@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace DUBuild.DU
 {
@@ -33,7 +34,7 @@ namespace DUBuild.DU
             return code;
         }
 
-        public Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, System.IO.FileInfo configFile, String outputFileName="out.json")
+        public Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, System.IO.FileInfo configFile, Utils.EnvContainer environmentVariables, Utils.GitContainer gitContainer, String outputFileName = "out.json")
         {
             var Logger = NLog.LogManager.GetCurrentClassLogger();
 
@@ -58,13 +59,6 @@ namespace DUBuild.DU
             var configuration = Newtonsoft.Json.JsonConvert.DeserializeObject<DU.Configuration>(configFile.OpenText().ReadToEnd());
             Logger.Info("Loaded build config successfully");
 
-            var environmentVariables = Environment.GetEnvironmentVariables();
-            Logger.Info("Environment Variables");
-            foreach (var key in environmentVariables.Keys)
-            {
-                Logger.Info("{0} -> {1}", key as string, environmentVariables[key] as string);
-            }
-
             var outputModule = new DU.OutputModule();
 
             var counter = 0;
@@ -74,10 +68,9 @@ namespace DUBuild.DU
                 if (slot.Code != null && slot.Code != String.Empty)
                 {
                     var code = slot.Code;
-                    foreach (var env in environmentVariables.Keys)
+                    foreach (var env in environmentVariables)
                     {
-                        var value = environmentVariables[env];
-                        code = code.Replace(env as string, value as string, StringComparison.InvariantCulture);
+                        code = code.Replace(env.Key, env.Value, StringComparison.InvariantCulture);
                     }
 
                     sb.Append(code);
@@ -90,6 +83,11 @@ namespace DUBuild.DU
                     var directoryInfo = fileInfo.Directory;
                     foreach (var file in directoryInfo.EnumerateFiles(filePattern))
                     {
+                        var relativePath = gitContainer.ConvertToRelative(sourceDir.FullName, file.FullName);
+                        environmentVariables.Remove("CI_FILE_LAST_COMMIT");
+                        var lastModifiyingHash = gitContainer.GetFileLastModifiedCommit(relativePath);
+                        environmentVariables["CI_FILE_LAST_COMMIT"] = lastModifiyingHash;
+
                         sb.Clear();
                         using (var sourceFileReader = new System.IO.StreamReader(file.FullName))
                         {
@@ -111,6 +109,10 @@ namespace DUBuild.DU
                     foreach (var sourceFile in slot.Files)
                     {
                         var sourcePath = System.IO.Path.Combine(sourceDir.FullName, sourceFile);
+                        environmentVariables.Remove("CI_FILE_LAST_COMMIT");
+                        var lastModifiyingHash = gitContainer.GetFileLastModifiedCommit(sourceFile);
+                        environmentVariables["CI_FILE_LAST_COMMIT"] = lastModifiyingHash;
+
                         using (var sourceFileReader = new System.IO.StreamReader(sourcePath))
                         {
                             var sourceFileContents = sourceFileReader.ReadToEnd();

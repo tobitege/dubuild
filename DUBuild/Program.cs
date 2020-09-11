@@ -49,11 +49,16 @@ namespace DUBuild
                         Environment.Exit(2);
                     }
 
+                    var envContainer = new Utils.EnvContainer();
+                    var gitContainer = new Utils.GitContainer(sourceDir.Value());
+
                     var builder = new DU.Builder(
                         new System.IO.DirectoryInfo(sourceDir.Value()),
                         new System.IO.DirectoryInfo(outputDir.Value()),
                         new System.IO.FileInfo(configFile.Value()),
-                        outFileName.HasValue()?outFileName.Value():"out.json"
+                        envContainer,
+                        gitContainer,
+                        outFileName.HasValue() ? outFileName.Value() : "out.json"
                         );
 
                     return 0;

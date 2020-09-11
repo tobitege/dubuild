@@ -11,3 +11,4 @@ RUN dotnet publish "DUBuild.csproj" -c Release -o /app/publish
 FROM mcr.microsoft.com/dotnet/core/runtime:3.1-alpine
 WORKDIR /app
 COPY --from=0 /app/publish .
+RUN apk --update add git
