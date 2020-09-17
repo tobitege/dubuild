@@ -28,8 +28,9 @@ namespace DUBuild_Tests
             ConfigFileMinified = new System.IO.FileInfo(System.IO.Path.Combine(RootDir, "config", "buildConfigMinified.json"));
             OutFile = System.IO.Path.Combine(OutDir.FullName, "out.json");
             OutFileMinified = System.IO.Path.Combine(OutDir.FullName, "outMinified.json");
-            new DUBuild.DU.Builder(SourceDir, OutDir, ConfigFile, "out.json");
-            new DUBuild.DU.Builder(SourceDir, OutDir, ConfigFileMinified, "outMinified.json");
+            var envContainer = new DUBuild.Utils.EnvContainer();
+            new DUBuild.DU.Builder(SourceDir, OutDir, ConfigFile, envContainer, null, "out.json");
+            new DUBuild.DU.Builder(SourceDir, OutDir, ConfigFileMinified, envContainer, null, "outMinified.json");
 
 
             if (System.IO.File.Exists(OutFile))
@@ -54,10 +55,10 @@ namespace DUBuild_Tests
         [Test]
         public void OutputCorrect()
         {
-            Assert.IsTrue(Source.Contains("\"Slots\": {"));
+            Assert.IsTrue(Source.Contains("\"slots\": {"));
             Assert.IsTrue(Source.Contains("\"2\": {"));
-            Assert.IsTrue(Source.Contains("\"Name\": \"library\","));
-            Assert.IsTrue(Source.Contains("\"Handlers\": ["));
+            Assert.IsTrue(Source.Contains("\"name\": \"library\","));
+            Assert.IsTrue(Source.Contains("\"handlers\": ["));
         }
 
         [Test]

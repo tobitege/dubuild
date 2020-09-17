@@ -34,23 +34,53 @@ namespace DUBuild.DU
             return code;
         }
 
-        public Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, System.IO.FileInfo configFile, Utils.EnvContainer environmentVariables, Utils.GitContainer gitContainer, String outputFileName = "out.json")
-        {
-            var Logger = NLog.LogManager.GetCurrentClassLogger();
+        private NLog.ILogger Logger;
 
+        public Utils.EnvContainer EnvironmentContainer { get; set; }
+        public Utils.GitContainer GitContainer { get; set; }
+
+        public System.IO.DirectoryInfo SourceDirectory { get; set; }
+        public System.IO.DirectoryInfo OutputDirectory { get; set; }
+
+        public Builder()
+        {
+            Logger = NLog.LogManager.GetCurrentClassLogger();
+        }
+        public Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, Utils.EnvContainer environmentVariables)
+            :this()
+        {
             Logger.Info("Source path : {0}", sourceDir.FullName);
             Logger.Info("Destination path : {0}", outputDir.FullName);
-            Logger.Info("Config path : {0}", configFile.FullName);
-            Logger.Info("Output filename : {0}", outputFileName);
 
-            if (!sourceDir.Exists)
+            SourceDirectory = sourceDir;
+            if (!SourceDirectory.Exists)
             {
                 throw new Exception("Source directory does not exist");
             }
+            OutputDirectory = outputDir;
             if (!outputDir.Exists)
             {
                 outputDir.Create();
             }
+
+            this.EnvironmentContainer = environmentVariables;
+
+        }
+        public Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, Utils.EnvContainer environmentVariables, Utils.GitContainer gitContainer)
+            :this(sourceDir, outputDir, environmentVariables)
+        {
+            this.GitContainer = gitContainer;
+        }
+        public Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, System.IO.FileInfo configFile, Utils.EnvContainer environmentVariables, Utils.GitContainer gitContainer, String outputFileName = "out.json")
+            :this(sourceDir, outputDir, environmentVariables, gitContainer)
+        {
+            Generate(configFile, outputFileName);
+        }
+
+        public bool Generate(System.IO.FileInfo configFile, string outputFileName)
+        {
+            Logger.Info("Config path : {0}", configFile.FullName);
+            Logger.Info("Output filename : {0}", outputFileName);
             if (!configFile.Exists)
             {
                 throw new Exception("Config file does not exist");
@@ -68,7 +98,7 @@ namespace DUBuild.DU
                 if (slot.Code != null && slot.Code != String.Empty)
                 {
                     var code = slot.Code;
-                    foreach (var env in environmentVariables)
+                    foreach (var env in EnvironmentContainer)
                     {
                         code = code.Replace(env.Key, env.Value, StringComparison.InvariantCulture);
                     }
@@ -83,17 +113,21 @@ namespace DUBuild.DU
                     var directoryInfo = fileInfo.Directory;
                     foreach (var file in directoryInfo.EnumerateFiles(filePattern))
                     {
-                        var relativePath = gitContainer.ConvertToRelative(sourceDir.FullName, file.FullName);
-                        environmentVariables.Remove("CI_FILE_LAST_COMMIT");
-                        var lastModifiyingHash = gitContainer.GetFileLastModifiedCommit(relativePath);
-                        environmentVariables["CI_FILE_LAST_COMMIT"] = lastModifiyingHash;
+
+                        if (GitContainer != null)
+                        {
+                            var relativePath = GitContainer.ConvertToRelative(SourceDirectory.FullName, file.FullName);
+                            EnvironmentContainer.Remove("CI_FILE_LAST_COMMIT");
+                            var lastModifiyingHash = GitContainer.GetFileLastModifiedCommit(relativePath);
+                            EnvironmentContainer["CI_FILE_LAST_COMMIT"] = lastModifiyingHash;
+                        }
 
                         sb.Clear();
                         using (var sourceFileReader = new System.IO.StreamReader(file.FullName))
                         {
                             var sourceFileContents = sourceFileReader.ReadToEnd();
 
-                            sourceFileContents = ReplaceEnv(sourceFileContents, environmentVariables);
+                            sourceFileContents = ReplaceEnv(sourceFileContents, EnvironmentContainer);
 
                             if (configuration.Minify) sourceFileContents = Minify(sourceFileContents);
                             sb.Append(sourceFileContents);
@@ -108,16 +142,22 @@ namespace DUBuild.DU
                     //Get source files
                     foreach (var sourceFile in slot.Files)
                     {
-                        var sourcePath = System.IO.Path.Combine(sourceDir.FullName, sourceFile);
-                        environmentVariables.Remove("CI_FILE_LAST_COMMIT");
-                        var lastModifiyingHash = gitContainer.GetFileLastModifiedCommit(sourceFile);
-                        environmentVariables["CI_FILE_LAST_COMMIT"] = lastModifiyingHash;
+
+                        var sourcePath = System.IO.Path.Combine(SourceDirectory.FullName, sourceFile);
+
+                        if (GitContainer != null)
+                        {
+                            EnvironmentContainer.Remove("CI_FILE_LAST_COMMIT");
+                            var lastModifiyingHash = GitContainer.GetFileLastModifiedCommit(sourceFile);
+                            EnvironmentContainer["CI_FILE_LAST_COMMIT"] = lastModifiyingHash;
+                        }
+
 
                         using (var sourceFileReader = new System.IO.StreamReader(sourcePath))
                         {
                             var sourceFileContents = sourceFileReader.ReadToEnd();
 
-                            sourceFileContents = ReplaceEnv(sourceFileContents, environmentVariables);
+                            sourceFileContents = ReplaceEnv(sourceFileContents, EnvironmentContainer);
 
                             if (configuration.Minify) sourceFileContents = Minify(sourceFileContents);
                             sb.Append(sourceFileContents);
@@ -129,10 +169,11 @@ namespace DUBuild.DU
                 counter++;
             }
 
-            var outputFile = System.IO.Path.Combine(outputDir.FullName, outputFileName);
+            var outputFile = System.IO.Path.Combine(OutputDirectory.FullName, outputFileName);
             var outputJsonData = Newtonsoft.Json.JsonConvert.SerializeObject(outputModule, Newtonsoft.Json.Formatting.Indented);
             Logger.Info("Writing output ({1} characters) to {0}", outputFile, outputJsonData.Length);
             System.IO.File.WriteAllText(outputFile, outputJsonData);
+            return true;
         }
 
         public string Minify(string source)
