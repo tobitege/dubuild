@@ -89,11 +89,13 @@ namespace DUBuild.DU
         public bool Generate(System.IO.FileInfo configFile, string outputFileName)
         {
             Logger.Info("Config path : {0}", configFile.FullName);
-            Logger.Info("Output filename : {0}", outputFileName);
-
-
             var configuration = LoadConfiguration(configFile);
             Logger.Info("Loaded build config successfully");
+            return Generate(configuration, outputFileName);
+        }
+        public bool Generate(Configuration configuration, string outputFileName)
+        {
+            Logger.Info("Output filename : {0}", outputFileName);
 
             var outputModule = new DU.OutputModule();
 
