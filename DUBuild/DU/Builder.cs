@@ -77,16 +77,22 @@ namespace DUBuild.DU
             Generate(configFile, outputFileName);
         }
 
-        public bool Generate(System.IO.FileInfo configFile, string outputFileName)
+        public DU.Configuration LoadConfiguration(System.IO.FileInfo configFile)
         {
-            Logger.Info("Config path : {0}", configFile.FullName);
-            Logger.Info("Output filename : {0}", outputFileName);
             if (!configFile.Exists)
             {
                 throw new Exception("Config file does not exist");
             }
-
             var configuration = Newtonsoft.Json.JsonConvert.DeserializeObject<DU.Configuration>(configFile.OpenText().ReadToEnd());
+            return configuration;
+        }
+        public bool Generate(System.IO.FileInfo configFile, string outputFileName)
+        {
+            Logger.Info("Config path : {0}", configFile.FullName);
+            Logger.Info("Output filename : {0}", outputFileName);
+
+
+            var configuration = LoadConfiguration(configFile);
             Logger.Info("Loaded build config successfully");
 
             var outputModule = new DU.OutputModule();
