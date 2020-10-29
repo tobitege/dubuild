@@ -25,8 +25,7 @@ namespace DUBuild
 
                 var sourceDir = command.Option("-s|--source", "Source files location", CommandOptionType.SingleValue);
                 var outputDir = command.Option("-o|--output", "Output location", CommandOptionType.SingleValue);
-                var configFile = command.Option("-c|--config", "Output location", CommandOptionType.SingleValue);
-                var outFileName = command.Option("-f|--filename", "Output file name", CommandOptionType.SingleValue);
+                var manifestFile = command.Option("-m|--manifest", "Manifest file location", CommandOptionType.SingleValue);
 
                 command.OnExecute(() =>
                 {
@@ -42,24 +41,28 @@ namespace DUBuild
                         app.ShowHint();
                         Environment.Exit(2);
                     }
-                    if (!configFile.HasValue())
+                    if (!manifestFile.HasValue())
                     {
-                        logger.Error("Missing config file");
+                        logger.Error("Missing manifest file");
                         app.ShowHint();
                         Environment.Exit(2);
                     }
 
                     var envContainer = new Utils.EnvContainer();
-                    var gitContainer = new Utils.GitContainer(sourceDir.Value());
+                    Utils.GitContainer gitContainer = null;
+                    try
+                    {
+                        gitContainer = new Utils.GitContainer(sourceDir.Value());
+                    } catch (Exception e) { logger.Warn(e, "Error loading git container, ignoring - Git hashes will not be available"); }
 
                     var builder = new DU.Builder(
                         new System.IO.DirectoryInfo(sourceDir.Value()),
                         new System.IO.DirectoryInfo(outputDir.Value()),
-                        new System.IO.FileInfo(configFile.Value()),
+                        new System.IO.FileInfo(manifestFile.Value()),
                         envContainer,
-                        gitContainer,
-                        outFileName.HasValue() ? outFileName.Value() : "out.json"
+                        gitContainer
                         );
+                    builder.ConstructAndSave();
 
                     return 0;
                 });

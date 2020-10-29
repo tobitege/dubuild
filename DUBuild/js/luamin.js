@@ -111,6 +111,9 @@ luamin = {};
 		if (originalName == 'self') {
 			return originalName;
 		}
+		if (originalName.startsWith("_")) {
+			return originalName;
+        }
 
 		if (hasOwnProperty.call(identifierMap, originalName)) {
 			return identifierMap[originalName];

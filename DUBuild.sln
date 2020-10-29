@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30309.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DUBuild", "DUBuild\DUBuild.csproj", "{665F7D67-0120-4F5F-80FB-6FD64BBF83F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DUBuild", "DUBuild\DUBuild.csproj", "{665F7D67-0120-4F5F-80FB-6FD64BBF83F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DUBuild Tests", "DUBuild Tests\DUBuild Tests.csproj", "{B8996C1B-428D-4600-882A-08E5AAB4EDA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DUBuild Tests", "DUBuild Tests\DUBuild Tests.csproj", "{B8996C1B-428D-4600-882A-08E5AAB4EDA1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
