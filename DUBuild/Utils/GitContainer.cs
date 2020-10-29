@@ -49,6 +49,10 @@ namespace DUBuild.Utils
             return p.StandardOutput.ReadToEnd().Replace("\n", String.Empty).Replace("\r", String.Empty);
         }
 
+        public string ConvertToRelative(string absolutePath)
+        {
+            return this.ConvertToRelative(this.gitPath, absolutePath);
+        }
         public string ConvertToRelative(string basePath, string absolutePath)
         {
             return absolutePath.Replace(basePath + "\\", String.Empty);

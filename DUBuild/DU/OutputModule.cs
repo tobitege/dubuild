@@ -56,6 +56,22 @@ namespace DUBuild.DU
     }
     public class OutputModule
     {
+        public class SlotKey
+        {
+            public static SlotKey Library = new SlotKey(-3);
+            public static SlotKey System = new SlotKey(-2);
+            public static SlotKey Unit = new SlotKey(-1);
+
+            public int Key { get; private set; }
+            public SlotKey(int val)
+            {
+                this.Key = val;
+            }
+
+            public static implicit operator int(SlotKey key) =>key.Key;
+            public static implicit operator string(SlotKey key) =>$"{key.Key}";
+        }
+
         [JsonProperty("slots")]
         public Dictionary<int, OutputSlot> Slots { get; set; }
         [JsonProperty("handlers")]
@@ -75,9 +91,9 @@ namespace DUBuild.DU
             {
                 Slots.Add(i, new OutputSlot(i));
             }
-            Slots.Add(-3, new OutputSlot("library"));
-            Slots.Add(-2, new OutputSlot("system"));
-            Slots.Add(-1, new OutputSlot("unit"));
+            Slots.Add(SlotKey.Library, new OutputSlot("library"));
+            Slots.Add(SlotKey.System, new OutputSlot("system"));
+            Slots.Add(SlotKey.Unit, new OutputSlot("unit"));
         }
     }
 }
