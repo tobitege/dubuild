@@ -8,9 +8,9 @@ namespace DUBuild.DU
 {
     public class SourceFile
     {
-        private static Regex regex_classname = new Regex(@"--@class[ ]*([\w]+)", RegexOptions.Compiled);
-        private static Regex regex_dependencies = new Regex(@"--@require[ ]*([\w]+)", RegexOptions.Compiled);
-        private static Regex regex_outName = new Regex(@"--@outFilename[ \t]*(.+)$", RegexOptions.Compiled);
+        private static Regex regex_classname = new Regex(@"[ \t]*--@class[ \t]+(\S+)", RegexOptions.Compiled);
+        private static Regex regex_dependencies = new Regex(@"[ \t]*--@require[ \t]+(\S+)", RegexOptions.Compiled);
+        private static Regex regex_outName = new Regex(@"[ \t]*--@outFilename[ \t]+(\S+)", RegexOptions.Compiled);
 
         public class NoClassNameException : Exception
         {
@@ -64,7 +64,11 @@ namespace DUBuild.DU
             var outFilename_match = regex_outName.Match(sf.Contents);
             if (outFilename_match.Success)
             {
-                sf.OutFilename = outFilename_match.Groups[1].Value;
+                var fn = outFilename_match.Groups[1].Value;
+                if (fn.Length > 1)
+                {
+                    sf.OutFilename = fn;
+                }
             }
 
             sf.GitHash = "NOHASH";
