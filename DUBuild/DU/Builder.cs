@@ -223,7 +223,7 @@ namespace DUBuild.DU
         protected OutputHandler ConstructOutputHandler(SourceFile source, int handlersCount, OutputModule.SlotKey slotKey, string method = "start", string argument = "")
         {
             //Semi dirty hack to add an environment variable
-            EnvironmentContainer["CI_FILE_LAST_COMMIT"] = source.GitHash;
+            EnvironmentContainer["GIT_FILE_LAST_COMMIT"] = source.GitHash;
 
             return new OutputHandler()
             {
