@@ -65,6 +65,7 @@ namespace DUBuild.DU
             :this(sourceDir, outputDir, environmentVariables, gitContainer)
         {
             MainFile = mainFile;
+            Logger.Info("Main file : {0}", mainFile.FullName);
         }
 
         /// <summary>
@@ -201,7 +202,7 @@ namespace DUBuild.DU
                         errors.Add(e);
                     }
 
-                    Console.WriteLine("Error processing {0}, {1}", sourceFileRaw.Name, e.Message);
+                    Logger.Error("Error processing {0}, {1}", sourceFileRaw.Name, e.Message);
                 }
             }
 
@@ -265,10 +266,6 @@ namespace DUBuild.DU
             engine.Execute("minified = luamin.minify(source)");
 
             return engine.GetValue("minified").AsString();
-        }
-        public Manifest LoadManifest(string manifestFile)
-        {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<Manifest>(System.IO.File.ReadAllText(manifestFile));
         }
     }
 }
