@@ -14,6 +14,9 @@ namespace DUBuild.Utils
                 var key = e as string;
                 this.Add(key, env[key] as string);
             }
+
+            //Handle special keys here
+            if (this.ContainsKey("CI_PIPELINE_IID") && !this.ContainsKey("CI_COMMIT_TAG")) this.Add("CI_COMMIT_TAG", $"Build {env["CI_PIPELINE_IID"] as string}");
         }
     }
 }
