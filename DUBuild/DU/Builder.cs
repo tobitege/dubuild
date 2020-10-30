@@ -13,7 +13,7 @@ namespace DUBuild.DU
             foreach (var env in envKeys.Keys)
             {
                 var value = envKeys[env];
-                code = code.Replace(env as string, value as string, StringComparison.InvariantCulture);
+                code = code.Replace($"%{env}%" as string, value as string, StringComparison.InvariantCulture);
             }
 
             return code;
