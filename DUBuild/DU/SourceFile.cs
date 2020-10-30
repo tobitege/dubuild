@@ -10,7 +10,7 @@ namespace DUBuild.DU
     {
         private static Regex regex_classname = new Regex(@"--@class[ ]*([\w]+)", RegexOptions.Compiled);
         private static Regex regex_dependencies = new Regex(@"--@require[ ]*([\w]+)", RegexOptions.Compiled);
-        private static Regex regex_outName = new Regex(@"--@outFilename[ ]*([\w.]+)", RegexOptions.Compiled);
+        private static Regex regex_outName = new Regex(@"--@outFilename[ \t]*(.+)$", RegexOptions.Compiled);
 
         public class NoClassNameException : Exception
         {
