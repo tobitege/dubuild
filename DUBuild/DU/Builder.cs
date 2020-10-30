@@ -21,19 +21,22 @@ namespace DUBuild.DU
 
         private NLog.ILogger Logger;
 
+        public bool TreatWarningsAsErrors { get; set; }
+
         public Utils.EnvContainer EnvironmentContainer { get; set; }
         public Utils.GitContainer GitContainer { get; set; }
 
         public System.IO.DirectoryInfo SourceDirectory { get; set; }
         public System.IO.DirectoryInfo OutputDir { get; set; }
 
-        public Manifest Manifest { get; set; }
+        public System.IO.FileInfo MainFile { get; set; }
 
         public Builder()
         {
             Logger = NLog.LogManager.GetCurrentClassLogger();
+            TreatWarningsAsErrors = true;
         }
-        public Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, Utils.EnvContainer environmentVariables)
+        private Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, Utils.EnvContainer environmentVariables)
             :this()
         {
             Logger.Info("Source path : {0}", sourceDir.FullName);
@@ -53,15 +56,15 @@ namespace DUBuild.DU
             this.EnvironmentContainer = environmentVariables;
 
         }
-        public Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, Utils.EnvContainer environmentVariables, Utils.GitContainer gitContainer)
+        private Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, Utils.EnvContainer environmentVariables, Utils.GitContainer gitContainer)
             :this(sourceDir, outputDir, environmentVariables)
         {
             this.GitContainer = gitContainer;
         }
-        public Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, System.IO.FileInfo manifestFile, Utils.EnvContainer environmentVariables, Utils.GitContainer gitContainer)
+        public Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, System.IO.FileInfo mainFile, Utils.EnvContainer environmentVariables, Utils.GitContainer gitContainer)
             :this(sourceDir, outputDir, environmentVariables, gitContainer)
         {
-            Manifest = LoadManifest(manifestFile.FullName);
+            MainFile = mainFile;
         }
 
         /// <summary>
@@ -71,30 +74,20 @@ namespace DUBuild.DU
         /// <returns></returns>
         public bool ConstructAndSave()
         {
-            if (Manifest == null) throw new Exception("Manifest has not been loaded");
-            return ConstructAndSave(Manifest);
-        }
-        /// <summary>
-        /// Constructs an output module and saves it
-        /// </summary>
-        /// <param name="manifest">A loaded manifest object, usually from json</param>
-        /// <param name="outputFilename">The full path to the output file</param>
-        /// <returns></returns>
-        public bool ConstructAndSave(Manifest manifest)
-        {
-            var outputModule = ConstructOutputModule(manifest);
-            return Save(outputModule, manifest.OutputFilename);
-        }
-
-        public OutputModule ConstructOutputModule(Manifest manifest)
-        {
             var sourceRepository = ConstructSourceTree(this.SourceDirectory, this.GitContainer);
-
-            var main = sourceRepository.GetByFilename(manifest.MainFile);
-            if (main == null) return null;
+            
+            var main = sourceRepository.GetByFilename(MainFile.Name);
+            if (main == null) return false;
 
             var dependencyTree = ConstructDependencyTree(main, sourceRepository);
 
+            var om = ConstructOutputModule(dependencyTree);
+            Save(om, main.OutFilename??"out.json");
+            return true;
+        }
+
+        public OutputModule ConstructOutputModule(DependencyTree dependencyTree)
+        {
             return Compile(dependencyTree);
         }
         /// <summary>
@@ -201,9 +194,18 @@ namespace DUBuild.DU
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Error processing {0}, {1}", sourceFileRaw.Name, e.Message);
+                    if (TreatWarningsAsErrors)
+                    {
+                        throw e;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error processing {0}, {1}", sourceFileRaw.Name, e.Message);
+                    }
+                    
                 }
             }
+
             return sourceRepository;
         }
         protected DependencyTree ConstructDependencyTree(SourceFile main, SourceRepository sourceFiles)

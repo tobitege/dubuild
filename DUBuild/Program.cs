@@ -25,7 +25,8 @@ namespace DUBuild
 
                 var sourceDir = command.Option("-s|--source", "Source files location", CommandOptionType.SingleValue);
                 var outputDir = command.Option("-o|--output", "Output location", CommandOptionType.SingleValue);
-                var manifestFile = command.Option("-m|--manifest", "Manifest file location", CommandOptionType.SingleValue);
+                var mainFile = command.Option("-m|--main", "Main file location", CommandOptionType.SingleValue);
+                var warningAsErrors = command.Option("-w|--warningsaserrors", "Treat warnings as errors", CommandOptionType.SingleValue);
 
                 command.OnExecute(() =>
                 {
@@ -41,9 +42,9 @@ namespace DUBuild
                         app.ShowHint();
                         Environment.Exit(2);
                     }
-                    if (!manifestFile.HasValue())
+                    if (!mainFile.HasValue())
                     {
-                        logger.Error("Missing manifest file");
+                        logger.Error("Missing main file");
                         app.ShowHint();
                         Environment.Exit(2);
                     }
@@ -55,14 +56,21 @@ namespace DUBuild
                         gitContainer = new Utils.GitContainer(sourceDir.Value());
                     } catch (Exception e) { logger.Warn(e, "Error loading git container, ignoring - Git hashes will not be available"); }
 
-                    var builder = new DU.Builder(
+                    var manifestFileInfo = new System.IO.FileInfo(mainFile.Value());
+                    foreach (var matchingFile in manifestFileInfo.Directory.EnumerateFiles(manifestFileInfo.Name))
+                    {
+                        var builder = new DU.Builder(
                         new System.IO.DirectoryInfo(sourceDir.Value()),
                         new System.IO.DirectoryInfo(outputDir.Value()),
-                        new System.IO.FileInfo(manifestFile.Value()),
+                        matchingFile,
                         envContainer,
                         gitContainer
                         );
-                    builder.ConstructAndSave();
+
+                        if (warningAsErrors.HasValue()) builder.TreatWarningsAsErrors = bool.Parse(warningAsErrors.Value());
+
+                        builder.ConstructAndSave();
+                    }
 
                     return 0;
                 });
