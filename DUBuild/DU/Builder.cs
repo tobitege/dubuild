@@ -176,6 +176,8 @@ namespace DUBuild.DU
         protected SourceRepository ConstructSourceTree(System.IO.DirectoryInfo sourceDirectory, Utils.GitContainer gitContainer)
         {
             var sourceRepository = new SourceRepository();
+            var errors = new List<Exception>();
+
             foreach (var sourceFileRaw in sourceDirectory.EnumerateFiles("*.lua", System.IO.SearchOption.AllDirectories))
             {
                 try
@@ -196,14 +198,16 @@ namespace DUBuild.DU
                 {
                     if (TreatWarningsAsErrors)
                     {
-                        throw e;
+                        errors.Add(e);
                     }
-                    else
-                    {
-                        Console.WriteLine("Error processing {0}, {1}", sourceFileRaw.Name, e.Message);
-                    }
-                    
+
+                    Console.WriteLine("Error processing {0}, {1}", sourceFileRaw.Name, e.Message);
                 }
+            }
+
+            if (errors.Count > 0)
+            {
+                throw new Exception("There were errors processing the source files");
             }
 
             return sourceRepository;
