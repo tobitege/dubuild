@@ -27,5 +27,5 @@ end
 function System.ActionLoop(action)
 end
 
-function Unit.Timer(timer)
+function Unit.Tick(timer)
 end

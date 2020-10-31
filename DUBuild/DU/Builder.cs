@@ -171,9 +171,9 @@ namespace DUBuild.DU
             var systemFlush = ConstructOutputHandler("_G.BuildSystem.Flush()", output.Handlers.Count, OutputModule.SlotKey.System, "flush");
             output.Handlers.Add(systemFlush);
             
-            foreach (var timer in mainFile.Timers)
+            foreach (var timer in mainFile.Timers ?? new List<string>())
             {
-                var timerTick = ConstructOutputHandler($"_G.BuildUnit.Timer({timer})", output.Handlers.Count, OutputModule.SlotKey.Unit, "tick(timerId)", timer);
+                var timerTick = ConstructOutputHandler($"_G.BuildUnit.Tick({timer})", output.Handlers.Count, OutputModule.SlotKey.Unit, "tick(timerId)", timer);
                 output.Handlers.Add(timerTick);
             }
 
