@@ -162,9 +162,9 @@ namespace DUBuild.DU
             output.Handlers.Add(unitStartHandler);
             var unitStopHandler = ConstructOutputHandler("_G.BuildUnit.Stop()", output.Handlers.Count, OutputModule.SlotKey.Unit, "stop");
             output.Handlers.Add(unitStopHandler);
-            var systemActionStart = ConstructOutputHandler("_G.BuildSystem.ActionStart(action)", output.Handlers.Count, OutputModule.SlotKey.System, "actionStart(action)", "*");
+            var systemActionStart = ConstructOutputHandler("_G.BuildSystem.ActionStart(action)", output.Handlers.Count, OutputModule.SlotKey.System, "actionStart(action)", new string[]{ "*" });
             output.Handlers.Add(systemActionStart);
-            var systemActionStop = ConstructOutputHandler("_G.BuildSystem.ActionStop(action)", output.Handlers.Count, OutputModule.SlotKey.System, "actionStop(action)", "*");
+            var systemActionStop = ConstructOutputHandler("_G.BuildSystem.ActionStop(action)", output.Handlers.Count, OutputModule.SlotKey.System, "actionStop(action)", new string[] { "*" });
             output.Handlers.Add(systemActionStop);
             var systemUpdate = ConstructOutputHandler("_G.BuildSystem.Update()", output.Handlers.Count, OutputModule.SlotKey.System, "update");
             output.Handlers.Add(systemUpdate);
@@ -173,8 +173,19 @@ namespace DUBuild.DU
             
             foreach (var timer in mainFile.Timers ?? new List<string>())
             {
-                var timerTick = ConstructOutputHandler($"_G.BuildUnit.Tick({timer})", output.Handlers.Count, OutputModule.SlotKey.Unit, "tick(timerId)", timer);
+                var timerTick = ConstructOutputHandler($"_G.BuildUnit.Tick({timer})", output.Handlers.Count, OutputModule.SlotKey.Unit, "tick(timerId)", new string[] { timer });
                 output.Handlers.Add(timerTick);
+            }
+
+            //Commence jank
+            for(int i = 0; i < 10; i++)
+            {
+                var slot_Receiver = ConstructOutputHandler($"_G.BuildReceiver.Received(channel, message, slot{i+1})", output.Handlers.Count, new OutputModule.SlotKey(i), "receive(channel,message)", new string[] { "*", "*" });
+                output.Handlers.Add(slot_Receiver);
+                var slot_ScreenDown = ConstructOutputHandler($"_G.BuildScreen.MouseDown(x, y, slot{i+1})", output.Handlers.Count, new OutputModule.SlotKey(i), "mouseDown(x,y)", new string[] { "*", "*" });
+                output.Handlers.Add(slot_ScreenDown);
+                var slot_ScreenUp = ConstructOutputHandler($"_G.BuildScreen.MouseUp(x, y, slot{i+1})", output.Handlers.Count, new OutputModule.SlotKey(i), "mouseUp(x,y)", new string[] { "*", "*" });
+                output.Handlers.Add(slot_ScreenUp);
             }
 
             return output;
@@ -226,31 +237,38 @@ namespace DUBuild.DU
 
             return dependencyTree;
         }
-        protected OutputHandler ConstructOutputHandler(SourceFile source, int handlersCount, OutputModule.SlotKey slotKey, string method = "start", string argument = "")
+
+        protected OutputHandler ConstructOutputHandler(SourceFile source, int handlersCount, OutputModule.SlotKey slotKey, string method = "start", string[] arguments = null)
         {
             //Semi dirty hack to add an environment variable
             EnvironmentContainer["GIT_FILE_LAST_COMMIT"] = source.GitHash;
+
+            var args = new List<Dictionary<string, string>>();
+            foreach (var str in arguments ?? new string[] { }) args.Add(new Dictionary<string, string>() { { "variable", str } });
 
             return new OutputHandler()
             {
                 Code = ReplaceEnv(source.Contents, EnvironmentContainer),
                 Filter = new OutputHandlerFilter()
                 {
-                    Args = (argument.Length > 0) ? new List<Dictionary<string, string>>() { new Dictionary<string, string>() { { "variable", argument } } } : new List<Dictionary<string, string>>(),
+                    Args = args,
                     Signature = method,
                     SlotKey = slotKey
                 },
                 Key = $"{handlersCount}"
             };
         }
-        protected OutputHandler ConstructOutputHandler(string source, int handlersCount, OutputModule.SlotKey slotKey, string method = "start", string argument = "")
+        protected OutputHandler ConstructOutputHandler(string source, int handlersCount, OutputModule.SlotKey slotKey, string method = "start", string[] arguments = null)
         {
+            var args = new List<Dictionary<string, string>>();
+            foreach (var str in arguments?? new string[] { }) args.Add(new Dictionary<string, string>() { { "variable", str } });
+
             return new OutputHandler()
             {
                 Code = ReplaceEnv(source, EnvironmentContainer),
                 Filter = new OutputHandlerFilter()
                 {
-                    Args = (argument.Length > 0) ? new List<Dictionary<string, string>>() { new Dictionary<string, string>() { { "variable", argument } } } : new List<Dictionary<string, string>>(),
+                    Args = args,
                     Signature = method,
                     SlotKey = slotKey
                 },

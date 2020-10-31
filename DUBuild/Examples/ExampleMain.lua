@@ -8,6 +8,11 @@ _G.BuildUnit = {}
 local Unit = _G.BuildUnit
 _G.BuildSystem = {}
 local System = _G.BuildSystem
+_G.BuildReceiver = {}
+local Receiver = _G.BuildReceiver
+_G.BuildScreen = {}
+local Screen = _G.BuildScreen
+
 
 function Unit.Start()
 	for index=1;index<10;index=index+1 do
@@ -28,4 +33,13 @@ function System.ActionLoop(action)
 end
 
 function Unit.Tick(timer)
+end
+
+function Receiver.Received(channel, message, slot)
+end
+
+function Screen.MouseDown(x, y, slot)
+end
+
+function Screen.MouseUp(x, y, slot)
 end
