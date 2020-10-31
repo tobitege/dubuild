@@ -59,8 +59,7 @@ namespace DUBuild
                     var manifestFileInfo = new System.IO.FileInfo(mainFile.Value());
                     foreach (var matchingFile in manifestFileInfo.Directory.EnumerateFiles(manifestFileInfo.Name))
                     {
-                        try
-                        {
+
                             var builder = new DU.Builder(
                                 new System.IO.DirectoryInfo(sourceDir.Value()),
                                 new System.IO.DirectoryInfo(outputDir.Value()),
@@ -73,11 +72,6 @@ namespace DUBuild
                             logger.Info("Treating errors as warnings? {0}", builder.TreatWarningsAsErrors);
 
                             builder.ConstructAndSave();
-                        }
-                        catch (Exception e)
-                        {
-                            logger.Error(e);
-                        }
                         
                     }
 
