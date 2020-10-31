@@ -1,6 +1,8 @@
 ﻿--@requires ExampleClass
 
 --@class ExampleMain
+--@outFilename Example
+--@timer ExampleTimer
 
 _G.BuildUnit = {}
 local Unit = _G.BuildUnit
@@ -23,4 +25,7 @@ function System.ActionStop(action)
 end
 
 function System.ActionLoop(action)
+end
+
+function Unit.Timer(timer)
 end

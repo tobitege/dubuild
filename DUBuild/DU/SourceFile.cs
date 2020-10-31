@@ -11,6 +11,7 @@ namespace DUBuild.DU
         private static Regex regex_classname = new Regex(@"[ \t]*--@class[ \t]+(\S+)", RegexOptions.Compiled);
         private static Regex regex_dependencies = new Regex(@"[ \t]*--@require[ \t]+(\S+)", RegexOptions.Compiled);
         private static Regex regex_outName = new Regex(@"[ \t]*--@outFilename[ \t]+(\S+)", RegexOptions.Compiled);
+        private static Regex regex_timers = new Regex(@"[ \t]*--@timer[ \t]+(\S+)", RegexOptions.Compiled);
 
         public class NoClassNameException : Exception
         {
@@ -24,6 +25,7 @@ namespace DUBuild.DU
         public string GitHash { get; set; }
         public string Contents { get; set; }
         public string OutFilename { get; set; }
+        public IEnumerable<string> Timers { get; set; }
 
         public SourceFile()
         {
@@ -59,6 +61,12 @@ namespace DUBuild.DU
             if (dependencies_match.Count > 0)
             {
                 sf.Dependencies = dependencies_match.Select(x => x.Groups[1].Value);
+            }
+
+            var timers_match = regex_timers.Matches(sf.Contents);
+            if (timers_match.Count > 0)
+            {
+                sf.Timers = timers_match.Select(x => x.Groups[1].Value);
             }
 
             var outFilename_match = regex_outName.Match(sf.Contents);

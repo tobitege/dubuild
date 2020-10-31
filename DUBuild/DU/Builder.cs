@@ -82,14 +82,14 @@ namespace DUBuild.DU
 
             var dependencyTree = ConstructDependencyTree(main, sourceRepository);
 
-            var om = ConstructOutputModule(dependencyTree);
+            var om = ConstructOutputModule(dependencyTree, main);
             Save(om, main.OutFilename??"out.json");
             return true;
         }
 
-        public OutputModule ConstructOutputModule(DependencyTree dependencyTree)
+        public OutputModule ConstructOutputModule(DependencyTree dependencyTree, SourceFile mainFile)
         {
-            return Compile(dependencyTree);
+            return Compile(dependencyTree, mainFile);
         }
         /// <summary>
         /// Save the provided output module to the previously set output path
@@ -115,7 +115,7 @@ namespace DUBuild.DU
             return true;
         }
 
-        protected OutputModule Compile(DependencyTree dependencyTree)
+        protected OutputModule Compile(DependencyTree dependencyTree, SourceFile mainFile)
         {
             var output = new OutputModule();
 
@@ -129,11 +129,11 @@ namespace DUBuild.DU
 
             //Add proxies
             //Make sure to add after every construct, since construct uses the current size of the output handlers for the key
-            Compile_AddProxies(output);
+            Compile_AddProxies(output, mainFile);
 
             return output;
         }
-        protected OutputModule CompileMinified(DependencyTree dependencyTree)
+        protected OutputModule CompileMinified(DependencyTree dependencyTree, SourceFile mainFile)
         {
             var output = new OutputModule();
             var ob = new StringBuilder();
@@ -151,12 +151,12 @@ namespace DUBuild.DU
 
             //Add proxies
             //Make sure to add after every construct, since construct uses the current size of the output handlers for the key
-            Compile_AddProxies(output);
+            Compile_AddProxies(output, mainFile);
 
             return output;
         }
 
-        protected OutputModule Compile_AddProxies(OutputModule output)
+        protected OutputModule Compile_AddProxies(OutputModule output, SourceFile mainFile)
         {
             var unitStartHandler = ConstructOutputHandler("_G.BuildUnit.Start()", output.Handlers.Count, OutputModule.SlotKey.Unit, "start");
             output.Handlers.Add(unitStartHandler);
@@ -170,6 +170,12 @@ namespace DUBuild.DU
             output.Handlers.Add(systemUpdate);
             var systemFlush = ConstructOutputHandler("_G.BuildSystem.Flush()", output.Handlers.Count, OutputModule.SlotKey.System, "flush");
             output.Handlers.Add(systemFlush);
+            
+            foreach (var timer in mainFile.Timers)
+            {
+                var timerTick = ConstructOutputHandler($"_G.BuildUnit.Timer({timer})", output.Handlers.Count, OutputModule.SlotKey.Unit, "tick(timerId)", timer);
+                output.Handlers.Add(timerTick);
+            }
 
             return output;
         }
