@@ -29,6 +29,12 @@
     <None Update="dest\empty.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="source\main_fails.lua">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="source\main.lua">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="source\test.lua">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

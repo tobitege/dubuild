@@ -60,19 +60,19 @@ namespace DUBuild
                     foreach (var matchingFile in manifestFileInfo.Directory.EnumerateFiles(manifestFileInfo.Name))
                     {
 
-                            var builder = new DU.Builder(
-                                new System.IO.DirectoryInfo(sourceDir.Value()),
-                                new System.IO.DirectoryInfo(outputDir.Value()),
-                                matchingFile,
-                                envContainer,
-                                gitContainer
-                            );
+                        var builder = new DU.Builder(
+                            new System.IO.DirectoryInfo(sourceDir.Value()),
+                            new System.IO.DirectoryInfo(outputDir.Value()),
+                            matchingFile,
+                            envContainer,
+                            gitContainer
+                        );
 
-                            if (warningAsErrors.HasValue()) builder.TreatWarningsAsErrors = bool.Parse(warningAsErrors.Value());
-                            logger.Info("Treating errors as warnings? {0}", builder.TreatWarningsAsErrors);
+                        if (warningAsErrors.HasValue()) builder.TreatWarningsAsErrors = bool.Parse(warningAsErrors.Value());
+                        logger.Info("Treating errors as warnings? {0}", builder.TreatWarningsAsErrors);
 
-                            builder.ConstructAndSave();
-                        
+                        builder.ConstructAndSave(false);
+                        builder.ConstructAndSave(true);
                     }
 
                     return 0;

@@ -1,5 +1,6 @@
 stages:
   - build
+  - test
 
 workflow:
   rules:
@@ -14,3 +15,15 @@ build:
     - echo "$CI_COMMIT_SHA" > DUBuild/versionhash
     - docker build --pull -t "registry.internal.st/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME" .
     - docker push "registry.internal.st/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME"
+
+test:
+  stage: test
+  image: mcr.microsoft.com/dotnet/core/sdk:3.1-alpine
+  variables:
+   GIT_SUBMODULE_STRATEGY: recursive
+  script:
+   - dotnet restore "$CI_PROJECT_DIR/DUBuild.Tests/DUBuild.Tests.csproj"
+   - dotnet test "$CI_PROJECT_DIR/DUBuild.Tests/DUBuild.Tests.csproj" --logger "junit;LogFilePath=$CI_PROJECT_DIR/app/results.xml"
+  artifacts:
+    reports:
+      junit: $CI_PROJECT_DIR/app/results.xml

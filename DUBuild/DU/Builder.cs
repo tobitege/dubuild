@@ -73,7 +73,7 @@ namespace DUBuild.DU
         /// Requires a manifest to be loaded, and the output path to be set
         /// </summary>
         /// <returns></returns>
-        public bool ConstructAndSave()
+        public bool ConstructAndSave(bool minified)
         {
             var sourceRepository = ConstructSourceTree(this.SourceDirectory, this.GitContainer);
             
@@ -82,24 +82,19 @@ namespace DUBuild.DU
 
             var dependencyTree = ConstructDependencyTree(main, sourceRepository);
 
-            var om = ConstructOutputModule(dependencyTree, main);
-            Save(om, main.OutFilename??"out.json");
+            var om = minified ? CompileMinified(dependencyTree, main) : Compile(dependencyTree, main);
+
+            var filename = main.OutFilename ?? "out.json";
+            if (minified)
+            {
+                var extension = new System.IO.FileInfo(filename).Extension;
+                filename = filename.Replace(extension, $".min{extension}");
+            }
+
+            Save(om, filename);
             return true;
         }
 
-        public OutputModule ConstructOutputModule(DependencyTree dependencyTree, SourceFile mainFile)
-        {
-            return Compile(dependencyTree, mainFile);
-        }
-        /// <summary>
-        /// Save the provided output module to the previously set output path
-        /// </summary>
-        /// <param name="outputModule"></param>
-        /// <returns></returns>
-        public bool Save(OutputModule outputModule)
-        {
-            return Save(outputModule, "out.json");
-        }
         /// <summary>
         /// Save the provided output module to the designated output path
         /// </summary>
