@@ -33,7 +33,7 @@ namespace DUBuild_Tests
         [Test]
         public void CompilesCorrectly()
         {
-            var b1 = new DUBuild.DU.Builder(SourceDir, OutDir, ConfigFile, EnvironmentContainer, null);
+            var b1 = new DUBuild.DU.Builder(SourceDir, new System.Collections.Generic.List<DirectoryInfo>(), OutDir, ConfigFile, EnvironmentContainer, null);
             Assert.DoesNotThrow(() => b1.ConstructAndSave(false));
             Assert.DoesNotThrow(() => b1.ConstructAndSave(true));
 
@@ -77,7 +77,7 @@ namespace DUBuild_Tests
         [Test]
         public void MissingDependencyFails()
         {
-            var b1 = new DUBuild.DU.Builder(SourceDir, OutDir, BadConfigFile, EnvironmentContainer, null);
+            var b1 = new DUBuild.DU.Builder(SourceDir, new System.Collections.Generic.List<DirectoryInfo>(), OutDir, BadConfigFile, EnvironmentContainer, null);
             Assert.Throws(typeof(DUBuild.DU.DependencyTree.MissingDependencyException), () => b1.ConstructAndSave(false));
             Assert.Throws(typeof(DUBuild.DU.DependencyTree.MissingDependencyException), () => b1.ConstructAndSave(true));
         }
