@@ -27,6 +27,7 @@ namespace DUBuild.DU
         public Utils.GitContainer GitContainer { get; set; }
 
         public System.IO.DirectoryInfo SourceDirectory { get; set; }
+        public List<System.IO.DirectoryInfo> ExcludeDirectories { get; set; }
         public System.IO.DirectoryInfo OutputDir { get; set; }
 
         public System.IO.FileInfo MainFile { get; set; }
@@ -36,11 +37,12 @@ namespace DUBuild.DU
             Logger = NLog.LogManager.GetCurrentClassLogger();
             TreatWarningsAsErrors = true;
         }
-        private Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, Utils.EnvContainer environmentVariables)
+        private Builder(System.IO.DirectoryInfo sourceDir, List<System.IO.DirectoryInfo> excludeDirs, System.IO.DirectoryInfo outputDir, Utils.EnvContainer environmentVariables)
             :this()
         {
             Logger.Info("Source path : {0}", sourceDir.FullName);
             Logger.Info("Destination path : {0}", outputDir.FullName);
+            Logger.Info("Exclude paths : {0}", string.Join(", ", excludeDirs.Select(x=>x.FullName)));
 
             SourceDirectory = sourceDir;
             if (!SourceDirectory.Exists)
@@ -53,16 +55,18 @@ namespace DUBuild.DU
                 outputDir.Create();
             }
 
+            this.ExcludeDirectories = excludeDirs;
+
             this.EnvironmentContainer = environmentVariables;
 
         }
-        private Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, Utils.EnvContainer environmentVariables, Utils.GitContainer gitContainer)
-            :this(sourceDir, outputDir, environmentVariables)
+        private Builder(System.IO.DirectoryInfo sourceDir, List<System.IO.DirectoryInfo> excludeDirs, System.IO.DirectoryInfo outputDir, Utils.EnvContainer environmentVariables, Utils.GitContainer gitContainer)
+            :this(sourceDir, excludeDirs, outputDir, environmentVariables)
         {
             this.GitContainer = gitContainer;
         }
-        public Builder(System.IO.DirectoryInfo sourceDir, System.IO.DirectoryInfo outputDir, System.IO.FileInfo mainFile, Utils.EnvContainer environmentVariables, Utils.GitContainer gitContainer)
-            :this(sourceDir, outputDir, environmentVariables, gitContainer)
+        public Builder(System.IO.DirectoryInfo sourceDir, List<System.IO.DirectoryInfo> excludeDirs, System.IO.DirectoryInfo outputDir, System.IO.FileInfo mainFile, Utils.EnvContainer environmentVariables, Utils.GitContainer gitContainer)
+            :this(sourceDir, excludeDirs, outputDir, environmentVariables, gitContainer)
         {
             MainFile = mainFile;
             Logger.Info("Main file : {0}", mainFile.FullName);
@@ -195,6 +199,8 @@ namespace DUBuild.DU
             {
                 try
                 {
+                    if (ExcludeDirectories.Any(x => sourceFileRaw.Directory.FullName.Contains(x.FullName))) continue;
+
                     if (gitContainer != null)
                     {
                         var sourceFile = SourceFile.Parse(sourceFileRaw, gitContainer);

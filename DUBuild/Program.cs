@@ -26,6 +26,7 @@ namespace DUBuild
                 var sourceDir = command.Option("-s|--source", "Source files location", CommandOptionType.SingleValue);
                 var outputDir = command.Option("-o|--output", "Output location", CommandOptionType.SingleValue);
                 var mainFile = command.Option("-m|--main", "Main file location", CommandOptionType.SingleValue);
+                var excludedDirectories = command.Option("-e|--exclude", "Comma separated list of directories to exclude from the source tree", CommandOptionType.SingleValue);
                 var warningAsErrors = command.Option("-w|--warningsaserrors", "Treat warnings as errors", CommandOptionType.SingleValue);
 
                 command.OnExecute(() =>
@@ -56,12 +57,28 @@ namespace DUBuild
                         gitContainer = new Utils.GitContainer(sourceDir.Value());
                     } catch (Exception e) { logger.Warn(e, "Error loading git container, ignoring - Git hashes will not be available"); }
 
+                    var excludeDirectories = new System.Collections.Generic.List<System.IO.DirectoryInfo>();
+                    if (excludedDirectories.HasValue())
+                    {
+                        var ex = excludedDirectories.Value();
+                        if (ex.Contains(","))
+                        {
+                            var exSplit = ex.Split(",");
+                            foreach (var exSplitPath in exSplit) excludeDirectories.Add(new System.IO.DirectoryInfo(exSplitPath));
+                        }
+                        else
+                        {
+                            excludeDirectories.Add(new System.IO.DirectoryInfo(ex));
+                        }
+                    }
+
                     var manifestFileInfo = new System.IO.FileInfo(mainFile.Value());
                     foreach (var matchingFile in manifestFileInfo.Directory.EnumerateFiles(manifestFileInfo.Name))
                     {
 
                         var builder = new DU.Builder(
                             new System.IO.DirectoryInfo(sourceDir.Value()),
+                            excludeDirectories,
                             new System.IO.DirectoryInfo(outputDir.Value()),
                             matchingFile,
                             envContainer,
