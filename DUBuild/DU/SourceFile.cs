@@ -12,11 +12,28 @@ namespace DUBuild.DU
         private static Regex regex_dependencies = new Regex(@"[ \t]*--@require[ \t]+(\S+)", RegexOptions.Compiled);
         private static Regex regex_outName = new Regex(@"[ \t]*--@outFilename[ \t]+(\S+)", RegexOptions.Compiled);
         private static Regex regex_timers = new Regex(@"[ \t]*--@timer[ \t]+(\S+)", RegexOptions.Compiled);
+        private static Regex regex_keybinds = new Regex(@"[ \t]*--@keybind[ \t]+(\S+)[ \t]+(true|false)[ \t]+([\w ]+)", RegexOptions.Compiled);
 
         public class NoClassNameException : Exception
         {
             public NoClassNameException(string message)
                 : base(message) { }
+        }
+
+        public class Keybind
+        {
+            public string KeybindName { get; set; }
+            public bool Toggle { get; set; }
+            public string Description { get; set; }
+
+            public static Keybind FromRegex(string name, string toggle, string description)
+            {
+                if (Boolean.TryParse(toggle, out var toggleBool))
+                {
+                    return new Keybind() { KeybindName = name, Description = description, Toggle = toggleBool };
+                }
+                return null;
+            }
         }
 
         public System.IO.FileInfo File { get; set; }
@@ -26,6 +43,7 @@ namespace DUBuild.DU
         public string Contents { get; set; }
         public string OutFilename { get; set; }
         public IEnumerable<string> Timers { get; set; }
+        public IEnumerable<Keybind> Keybinds { get; set; }
 
         public SourceFile()
         {
@@ -67,6 +85,12 @@ namespace DUBuild.DU
             if (timers_match.Count > 0)
             {
                 sf.Timers = timers_match.Select(x => x.Groups[1].Value);
+            }
+
+            var keybinds_match = regex_keybinds.Matches(sf.Contents);
+            if (keybinds_match.Count > 0)
+            {
+                sf.Keybinds = keybinds_match.Select(x => Keybind.FromRegex(x.Groups[1].Value, x.Groups[2].Value, x.Groups[3].Value)).Where(x=>x != null);
             }
 
             var outFilename_match = regex_outName.Match(sf.Contents);
