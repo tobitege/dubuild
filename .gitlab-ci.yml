@@ -14,6 +14,7 @@ build:
   script:
     - echo "$CI_COMMIT_SHA" > DUBuild/versionhash
     - docker build --pull -t "$LOCAL_DOCKER_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME" .
+    - docker tag v3 "$LOCAL_DOCKER_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME"
     - docker push "$LOCAL_DOCKER_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME"
 
 test:
