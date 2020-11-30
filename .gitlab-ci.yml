@@ -1,10 +1,6 @@
 stages:
   - build
 
-workflow:
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-
 build:
   image: docker:latest
   stage: build
@@ -12,5 +8,5 @@ build:
     GIT_SUBMODULE_STRATEGY: recursive
   script:
     - echo "$CI_COMMIT_SHA" > DUBuild/versionhash
-    - docker build --pull -t "registry.internal.st/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME" .
+    - docker build --pull -t "registry.internal.st/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:v2" .
     - docker push "registry.internal.st/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME"
