@@ -43,3 +43,9 @@ end
 
 function Screen.MouseUp(x, y, slot)
 end
+
+function System.Update()
+end
+
+function System.Flush()
+end
