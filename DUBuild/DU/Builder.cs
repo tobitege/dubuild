@@ -1,4 +1,4 @@
-﻿using Jint;
+using Jint;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -172,7 +172,7 @@ namespace DUBuild.DU
             
             foreach (var timer in mainFile.Timers ?? new List<string>())
             {
-                var timerTick = ConstructOutputHandler($"_G.BuildUnit.Tick({timer})", output.Handlers.Count, OutputModule.SlotKey.Unit, "tick(timerId)", new string[] { timer });
+                var timerTick = ConstructOutputHandler($"_G.BuildUnit.Tick(\"{timer}\")", output.Handlers.Count, OutputModule.SlotKey.Unit, "tick(timerId)", new string[] { timer });
                 output.Handlers.Add(timerTick);
             }
 
