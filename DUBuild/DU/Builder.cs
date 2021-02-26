@@ -165,6 +165,8 @@ namespace DUBuild.DU
             output.Handlers.Add(systemActionStart);
             var systemActionStop = ConstructOutputHandler("_G.BuildSystem.ActionStop(action)", output.Handlers.Count, OutputModule.SlotKey.System, "actionStop(action)", new string[] { "*" });
             output.Handlers.Add(systemActionStop);
+            var inputText = ConstructOutputHandler("_G.BuildSystem.InputText(action)", output.Handlers.Count, OutputModule.SlotKey.System, "inputText(action)", new string[] { "*" });
+            output.Handlers.Add(inputText);
             var systemUpdate = ConstructOutputHandler("_G.BuildSystem.Update()", output.Handlers.Count, OutputModule.SlotKey.System, "update");
             output.Handlers.Add(systemUpdate);
             var systemFlush = ConstructOutputHandler("_G.BuildSystem.Flush()", output.Handlers.Count, OutputModule.SlotKey.System, "flush");
