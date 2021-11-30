@@ -20,7 +20,8 @@ namespace DUBuild
             app.Description = "Dual Universe script compiler";
             app.HelpOption("-?|-h|--help");
 
-            app.Command("build", (command) =>{
+            app.Command("build", (command) =>
+            {
                 command.Description = "Build a DU script";
 
                 var sourceDir = command.Option("-s|--source", "Source files location", CommandOptionType.SingleValue);
@@ -28,6 +29,7 @@ namespace DUBuild
                 var mainFile = command.Option("-m|--main", "Main file location", CommandOptionType.SingleValue);
                 var excludedDirectories = command.Option("-e|--exclude", "Comma separated list of directories to exclude from the source tree", CommandOptionType.SingleValue);
                 var warningAsErrors = command.Option("-w|--warningsaserrors", "Treat warnings as errors", CommandOptionType.SingleValue);
+                var skipMinify = command.Option("-nm|--no-minify", "Skip minification", CommandOptionType.NoValue);
 
                 command.OnExecute(() =>
                 {
@@ -55,7 +57,8 @@ namespace DUBuild
                     try
                     {
                         gitContainer = new Utils.GitContainer(sourceDir.Value());
-                    } catch (Exception e) { logger.Warn(e, "Error loading git container, ignoring - Git hashes will not be available"); }
+                    }
+                    catch (Exception e) { logger.Warn(e, "Error loading git container, ignoring - Git hashes will not be available"); }
 
                     var excludeDirectories = new System.Collections.Generic.List<System.IO.DirectoryInfo>();
                     if (excludedDirectories.HasValue())
@@ -86,10 +89,13 @@ namespace DUBuild
                         );
 
                         if (warningAsErrors.HasValue()) builder.TreatWarningsAsErrors = bool.Parse(warningAsErrors.Value());
-                        logger.Info("Treating errors as warnings? {0}", builder.TreatWarningsAsErrors);
+                        logger.Info("Treating warnings as errors? {0}", builder.TreatWarningsAsErrors);
 
                         builder.ConstructAndSave(false);
-                        builder.ConstructAndSave(true);
+                        if (!skipMinify.HasValue())
+                        {
+                            builder.ConstructAndSave(true);
+                        }
                     }
 
                     return 0;
