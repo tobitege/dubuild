@@ -1,14 +1,36 @@
 stages:
-  - test
   - build
+  - test
+  - release
 
 workflow:
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
 
-build:
-  image: docker:latest
+Build Artifacts:
+  stage: release
+  needs: [Run Tests]
+  image: mcr.microsoft.com/dotnet/core/sdk:3.1-alpine
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  variables:
+      GIT_SUBMODULE_STRATEGY: recursive
+  script:
+    - echo "$CI_COMMIT_SHA" > DUBuild/versionhash
+    - dotnet restore "$CI_PROJECT_DIR/DUBuild/DUBuild.csproj"
+    - dotnet build "$CI_PROJECT_DIR/DUBuild/DUBuild.csproj" -c Release -o ./build
+    - dotnet publish "$CI_PROJECT_DIR/DUBuild/DUBuild.csproj" -c Release -o ./publish
+  artifacts:
+    name: "DUBuild-Release"
+    expose_as: 'build artifact'
+    paths:
+      - publish/
+    exclude:
+      - publish/**/*.pdb
+
+Build Docker:
   stage: build
+  image: docker:latest
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   script:
@@ -16,8 +38,9 @@ build:
     - docker build --pull -t "$LOCAL_DOCKER_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME" -t "$LOCAL_DOCKER_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME:v3" .
     - docker push "$LOCAL_DOCKER_REGISTRY/$CI_PROJECT_NAMESPACE/$CI_PROJECT_NAME"
 
-test:
+Run Tests:
   stage: test
+  needs: [Build Docker]
   image: mcr.microsoft.com/dotnet/core/sdk:3.1-alpine
   variables:
    GIT_SUBMODULE_STRATEGY: recursive
