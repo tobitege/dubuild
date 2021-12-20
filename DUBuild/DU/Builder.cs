@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using static DUBuild.DU.OutputModule;
+using System.IO;
 
 namespace DUBuild.DU
 {
@@ -117,18 +119,31 @@ namespace DUBuild.DU
         protected OutputModule Compile(DependencyTree dependencyTree, SourceFile mainFile)
         {
             var output = new OutputModule();
+            string moduleIndex = "_G._ModuleIndex={}\r\n";
 
             //Add Dependencies + Main file
             foreach (var dependency in dependencyTree.GetDependencyOrder())
-            { 
+            {
                 var dependencySource = dependency.Key;
-                var constructedHandler = ConstructOutputHandler(dependencySource, output.Handlers.Count, OutputModule.SlotKey.Unit);
+                var constructedHandler = ConstructOutputHandler(dependencySource, output.Handlers.Count, SlotKey.Unit);
+                moduleIndex += $"_G._ModuleIndex[{output.Handlers.Count}]='{Path.GetFileName(dependencySource.File.ToString())}';";
                 output.Handlers.Add(constructedHandler);
             }
 
             //Add proxies
             //Make sure to add after every construct, since construct uses the current size of the output handlers for the key
             Compile_AddProxies(output, mainFile);
+
+            output.Handlers.Add(new OutputHandler() {
+                Key = "1",
+                Filter = new OutputHandlerFilter()
+                {
+                    Signature = "start",
+                    SlotKey = SlotKey.Library,
+                    Args = new List<Dictionary<string, string>>()
+                },
+                Code = moduleIndex
+            });
 
             return output;
         }
