@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: [ '3.1.x', '6.0.x' ]
+        dotnet-version: [ '8.0.x' ]
     steps:
       - uses: actions/checkout@v4
       - name: Setup dotnet ${{ matrix.dotnet-version }}
@@ -16,5 +16,7 @@ jobs:
         run: dotnet restore
       - name: Build
         run: dotnet build
-      - name: Test with the dotnet CLI
+      - name: Publish
+        run: dotnet publish
+      - name: Test
         run: dotnet test

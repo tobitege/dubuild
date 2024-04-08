@@ -36,9 +36,8 @@ namespace DUBuild_Tests
             var b1 = new DUBuild.DU.Builder(SourceDir, new System.Collections.Generic.List<DirectoryInfo>(), OutDir, ConfigFile, EnvironmentContainer, null);
             Assert.DoesNotThrow(() => b1.ConstructAndSave(false));
             Assert.DoesNotThrow(() => b1.ConstructAndSave(true));
-
-            Assert.IsTrue(OutFile.Exists);
-            Assert.IsTrue(OutFileMinified.Exists);
+            Assert.That(OutFile.Exists);
+            Assert.That(OutFileMinified.Exists);
 
         }
 
@@ -48,21 +47,21 @@ namespace DUBuild_Tests
             var source = new StreamReader(OutFile.OpenRead()).ReadToEnd();
             var sourceMinified = new StreamReader(OutFileMinified.OpenRead()).ReadToEnd();
 
-            Assert.IsTrue(source.Contains("\"slots\": {"));
-            Assert.IsTrue(source.Contains("\"2\": {"));
-            Assert.IsTrue(source.Contains("\"name\": \"library\","));
-            Assert.IsTrue(source.Contains("\"handlers\": ["));
-            Assert.IsTrue(sourceMinified.Contains("\"slots\": {"));
-            Assert.IsTrue(sourceMinified.Contains("\"2\": {"));
-            Assert.IsTrue(sourceMinified.Contains("\"name\": \"library\","));
-            Assert.IsTrue(sourceMinified.Contains("\"handlers\": ["));
+            Assert.That(source.Contains("\"slots\": {"));
+            Assert.That(source.Contains("\"2\": {"));
+            Assert.That(source.Contains("\"name\": \"library\","));
+            Assert.That(source.Contains("\"handlers\": ["));
+            Assert.That(sourceMinified.Contains("\"slots\": {"));
+            Assert.That(sourceMinified.Contains("\"2\": {"));
+            Assert.That(sourceMinified.Contains("\"name\": \"library\","));
+            Assert.That(sourceMinified.Contains("\"handlers\": ["));
         }
 
         [Test]
         public void MinifiedCorrectly()
         {
             var sourceMinified = new StreamReader(OutFileMinified.OpenRead()).ReadToEnd();
-            Assert.IsFalse(sourceMinified.Contains("--This is a test"));
+            Assert.That(!sourceMinified.Contains("--This is a test"));
         }
 
         [Test]
@@ -70,8 +69,8 @@ namespace DUBuild_Tests
         {
             var source = new StreamReader(OutFile.OpenRead()).ReadToEnd();
             var sourceMinified = new StreamReader(OutFileMinified.OpenRead()).ReadToEnd();
-            Assert.IsTrue(source.Contains("_G.BuildUnit = {}"));
-            Assert.IsTrue(sourceMinified.Contains("_G.BuildUnit={}"));
+            Assert.That(source.Contains("_G.BuildUnit = {}"));
+            Assert.That(sourceMinified.Contains("_G.BuildUnit={}"));
         }
 
         [Test]
