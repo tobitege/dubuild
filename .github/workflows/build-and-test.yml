@@ -24,4 +24,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: DUBUild
-          path: DUBuild/bin/Release/net8.0/
+          path: |
+            DUBuild/bin/Release/net8.0/publish/
+            !**/**.pdb
