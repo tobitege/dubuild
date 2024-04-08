@@ -23,7 +23,7 @@ jobs:
       - name: Upload package
         uses: actions/upload-artifact@v4
         with:
-          name: DUBUild
+          name: DUBuild
           path: |
             DUBuild/bin/Release/net8.0/publish/
             !**/**.pdb
