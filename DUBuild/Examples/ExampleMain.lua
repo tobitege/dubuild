@@ -13,39 +13,38 @@ local Receiver = _G.BuildReceiver
 _G.BuildScreen = {}
 local Screen = _G.BuildScreen
 
-
-function Unit.Start()
-	for index=1;index<10;index=index+1 do
-	if test then boo() else blaa() end
+function Unit.onStart()
+	for index=1, 10, 1 do
+		if index <= 5 then boo() else blaa() end
 	end
 end
 
-function Unit.Stop()
+function Unit.onStop()
 end
 
-function System.ActionStart(action)
+function System.onActionStart(action)
 end
 
-function System.ActionStop(action)
+function System.onActionStop(action)
 end
 
-function System.ActionLoop(action)
+function System.onActionLoop(action)
 end
 
-function Unit.Tick(timer)
+function Unit.onTimer(timer)
 end
 
-function Receiver.Received(channel, message, slot)
+function Receiver.onReceived(channel, message, slot)
 end
 
-function Screen.MouseDown(x, y, slot)
+function Screen.onMouseDown(x, y, slot)
 end
 
-function Screen.MouseUp(x, y, slot)
+function Screen.onMouseUp(x, y, slot)
 end
 
-function System.Update()
+function System.onUpdate()
 end
 
-function System.Flush()
+function System.onFlush()
 end
