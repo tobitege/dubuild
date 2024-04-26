@@ -6,24 +6,24 @@ local Unit = _G.BuildUnit
 _G.BuildSystem = {}
 local System = _G.BuildSystem
 
-function Unit.Start()
+function Unit.onStart()
 	STUMP.dump(_G);
 end
 
-function Unit.Stop()
+function Unit.onStop()
 end
 
-function System.ActionStart(action)
+function System.onActionStart(action)
 end
 
-function System.ActionStop(action)
+function System.onActionStop(action)
 end
 
-function System.ActionLoop(action)
+function System.onActionLoop(action)
 end
 
-function System.Update()
+function System.onUpdate()
 end
 
-function System.Flush()
+function System.onFlush()
 end
