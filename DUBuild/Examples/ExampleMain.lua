@@ -8,6 +8,8 @@ _G.BuildUnit = {}
 local Unit = _G.BuildUnit
 _G.BuildSystem = {}
 local System = _G.BuildSystem
+_G.BuildEmitter = {}
+local Emitter = _G.BuildEmitter
 _G.BuildReceiver = {}
 local Receiver = _G.BuildReceiver
 _G.BuildScreen = {}
@@ -32,6 +34,9 @@ function System.onActionLoop(action)
 end
 
 function Unit.onTimer(timer)
+end
+
+function Emitter.onSent(channel, message, slot)
 end
 
 function Receiver.onReceived(channel, message, slot)

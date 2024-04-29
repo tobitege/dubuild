@@ -196,6 +196,8 @@ namespace DUBuild.DU
             //Commence jank
             for(int i = 0; i < 10; i++)
             {
+                var slot_Emitter = ConstructOutputHandler($"_G.BuildEmitter.onSent(channel, message, slot{i+1})", output.Handlers.Count, new OutputModule.SlotKey(i), "onSent(channel,message)", new string[] { "*", "*" });
+                output.Handlers.Add(slot_Emitter);
                 var slot_Receiver = ConstructOutputHandler($"_G.BuildReceiver.onReceived(channel, message, slot{i+1})", output.Handlers.Count, new OutputModule.SlotKey(i), "onReceived(channel,message)", new string[] { "*", "*" });
                 output.Handlers.Add(slot_Receiver);
                 var slot_ScreenDown = ConstructOutputHandler($"_G.BuildScreen.onMouseDown(x, y, slot{i+1})", output.Handlers.Count, new OutputModule.SlotKey(i), "onMouseDown(x,y)", new string[] { "*", "*" });
